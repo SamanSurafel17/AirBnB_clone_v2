@@ -1,16 +1,23 @@
 #!/usr/bin/python3
-# prepare tar file
+"""pack all content within web_static
+"""
 from fabric.api import local
-from time import strftime
+from datetime import datetime
+import os
 
 
 def do_pack():
-    """generate .tgz archive"""
-    timenow = strftime("%Y%M%d%H%M%S")
-    try:
-        local("mkdir -p versions")
-        filepath = "versions/web_static_{}.tgz".format(timenow)
-        local("tar -cvzf {} web_static/".format(filepath))
-        return filepath
-    except:
-        return None
+    """pack all content within web_static
+    into a .tgz archive
+    The archive will be put in versions/
+    """
+    if not os.path.exists("versions"):
+        local("mkdir versions")
+    now = datetime.now()
+    name = "versions/web_static_{}.tgz".format(
+        now.strftime("%Y%m%d%H%M%S")
+    )
+    cmd = "tar -cvzf {} {}".format(name, "web_static")
+    result = local(cmd)
+    if not result.failed:
+        return name
