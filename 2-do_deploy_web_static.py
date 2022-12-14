@@ -1,58 +1,30 @@
 #!/usr/bin/python3
-"""pack and deploy content to server
-"""
-from fabric.api import local, env, run, put
+"""distributes an archive to a web servers, using the function do_deploy"""
+from fabric.api import *
 from datetime import datetime
-import os
-env.hosts = ['35.231.156.161', '34.73.64.44']
-env.user = 'ubuntu'
+import os.path
 
-
-def do_pack():
-    """pack all content within web_static
-    into a .tgz archive
-    The archive will be put in versions/
-    """
-    if not os.path.exists("versions"):
-        local("mkdir versions")
-    now = datetime.now()
-    name = "versions/web_static_{}.tgz".format(
-        now.strftime("%Y%m%d%H%M%S")
-    )
-    cmd = "tar -cvzf {} {}".format(name, "web_static")
-    result = local(cmd)
-    if not result.failed:
-        return name
+env.hosts = ['34.238.190.62', '34.139.86.185']
 
 
 def do_deploy(archive_path):
-    """deploy package to remote server
-    Arguments:
-        archive_path: path to archive to deploy
-    """
-    if not archive_path or not os.path.exists(archive_path):
-        return False
-    put(archive_path, '/tmp')
-    ar_name = archive_path[archive_path.find("/") + 1: -4]
-    try:
-        run('mkdir -p /data/web_static/releases/{}/'.format(ar_name))
-        run('tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/'.format(
-                ar_name, ar_name
-        ))
-        run('rm /tmp/{}.tgz'.format(ar_name))
-        run('mv /data/web_static/releases/{}/web_static/* \
-            /data/web_static/releases/{}/'.format(
-                ar_name, ar_name
-        ))
-        run('rm -rf /data/web_static/releases/{}/web_static'.format(
-            ar_name
-        ))
-        run('rm -rf /data/web_static/current')
-        run('ln -s /data/web_static/releases/{}/ \
-            /data/web_static/current'.format(
-            ar_name
-        ))
+    """transfer files to web server"""
+
+    if os.path.isfile(archive_path):
+        pre_path = archive_path.split("/")[1]
+        put(archive_path, "/tmp/")
+        path_l = "/tmp/" + pre_path
+        path_r = "/data/web_static/releases/" + pre_path.split(".")[0]
+        sudo("mkdir -p {:s}".format(path_r))
+        sudo("tar -xzf {:s} -C {:s}".format(path_l, path_r))
+        sudo("rm {:s}".format(path_l))
+        path_m = path_r + "/web_static/*"
+        path_d = path_r + "/web_static/"
+        sudo("mv {:s} {:s}".format(path_m, path_r))
+        sudo("rm -rf {:s}".format(path_d))
+        sudo("rm -rf /data/web_static/current")
+        sudo("ln -s {:s} /data/web_static/current".format(path_r))
         print("New version deployed!")
         return True
-    except:
+    else:
         return False

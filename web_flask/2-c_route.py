@@ -1,30 +1,33 @@
 #!/usr/bin/python3
-"""simple flask app
+
+
 """
+a script that starts a Flask web application in which
+one route accepts user input
+"""
+
 from flask import Flask
 app = Flask(__name__)
 
 
 @app.route("/", strict_slashes=False)
-def hello_hbnb():
-    """root route
-    """
+def hello():
+    """Displays 'Hello HBNB!'"""
     return "Hello HBNB!"
 
 
 @app.route("/hbnb", strict_slashes=False)
 def hbnb():
-    """hbnb
-    """
-    return "HBNB"
+    '''Displays "HBNB" '''
+    return 'HBNB'
 
 
 @app.route("/c/<text>", strict_slashes=False)
-def cisfun(text):
-    """c what
-    """
-    return "C {}".format(text.replace('_', ' '))
+def message(text):
+    '''Display "C" followed by the text variable'''
+    text = text.replace('_', ' ')
+    return 'C %s' % text
 
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=5000)
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')

@@ -1,67 +1,68 @@
 #!/usr/bin/python3
-"""test for state"""
-import unittest
-import os
+""" Contains tests for class State """
+from tests.test_models.test_base_model import test_basemodel
 from models.state import State
-from models.base_model import BaseModel
+from models import state
+import inspect
 import pep8
+import unittest
 
 
-class TestState(unittest.TestCase):
-    """this will test the State class"""
+class test_state(test_basemodel):
+    """ Tests for class State """
 
+    def __init__(self, *args, **kwargs):
+        """ Initialize class test_state and set up resources """
+        super().__init__(*args, **kwargs)
+        self.name = "State"
+        self.value = State
+
+    def test_name(self):
+        """ Test attribute name is empty"""
+        new = self.value()
+        self.assertTrue(hasattr(new, "name"))
+        self.assertEqual(new.name, None)
+
+
+class TestStateDocs(unittest.TestCase):
+    """Tests to check the documentation and style of State class"""
     @classmethod
     def setUpClass(cls):
-        """set up for test"""
-        cls.state = State()
-        cls.state.name = "CA"
+        """Set up for the doc tests"""
+        cls.state_f = inspect.getmembers(State, inspect.isfunction)
 
-    @classmethod
-    def teardown(cls):
-        """at the end of the test this will tear it down"""
-        del cls.state
+    def test_pep8_conformance_state(self):
+        """Test that models/state.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['models/state.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def tearDown(self):
-        """teardown"""
-        try:
-            os.remove("file.json")
-        except Exception:
-            pass
+    def test_pep8_conformance_test_state(self):
+        """Test that tests/test_models/test_state.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['tests/test_models/test_state.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_pep8_Review(self):
-        """Tests pep8 style"""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/state.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
+    def test_state_module_docstring(self):
+        """Test for the state.py module docstring"""
+        self.assertIsNot(state.__doc__, None,
+                         "state.py needs a docstring")
+        self.assertTrue(len(state.__doc__) >= 1,
+                        "state.py needs a docstring")
 
-    def test_checking_for_docstring_State(self):
-        """checking for docstrings"""
-        self.assertIsNotNone(State.__doc__)
+    def test_state_class_docstring(self):
+        """Test for the State class docstring"""
+        self.assertIsNot(State.__doc__, None,
+                         "State class needs a docstring")
+        self.assertTrue(len(State.__doc__) >= 1,
+                        "State class needs a docstring")
 
-    def test_attributes_State(self):
-        """chekcing if State have attributes"""
-        self.assertTrue('id' in self.state.__dict__)
-        self.assertTrue('created_at' in self.state.__dict__)
-        self.assertTrue('updated_at' in self.state.__dict__)
-        self.assertTrue('name' in self.state.__dict__)
-
-    def test_is_subclass_State(self):
-        """test if State is subclass of BaseModel"""
-        self.assertTrue(issubclass(self.state.__class__, BaseModel), True)
-
-    def test_attribute_types_State(self):
-        """test attribute type for State"""
-        self.assertEqual(type(self.state.name), str)
-
-    def test_save_State(self):
-        """test if the save works"""
-        self.state.save()
-        self.assertNotEqual(self.state.created_at, self.state.updated_at)
-
-    def test_to_dict_State(self):
-        """test if dictionary works"""
-        self.assertEqual('to_dict' in dir(self.state), True)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_state_func_docstrings(self):
+        """Test for the presence of docstrings in State methods"""
+        for func in self.state_f:
+            self.assertIsNot(func[1].__doc__, None,
+                             "{:s} method needs a docstring".format(func[0]))
+            self.assertTrue(len(func[1].__doc__) >= 1,
+                            "{:s} method needs a docstring".format(func[0]))

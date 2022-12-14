@@ -1,77 +1,86 @@
 #!/usr/bin/python3
-"""test for user"""
-import unittest
-import os
+""" Contains tests for class User """
+from tests.test_models.test_base_model import test_basemodel
 from models.user import User
-from models.base_model import BaseModel
+from models import user
 import pep8
-from os import environ as env
+import inspect
+import unittest
 
 
-class TestUser(unittest.TestCase):
-    """this will test the User class"""
+class test_User(test_basemodel):
+    """ Tests for class User """
 
+    def __init__(self, *args, **kwargs):
+        """ Initialize class and set up resources """
+        super().__init__(*args, **kwargs)
+        self.name = "User"
+        self.value = User
+
+    def test_first_name(self):
+        """ Test first_name attribute is empty"""
+        new = self.value()
+        self.assertTrue(hasattr(new, "first_name"))
+        self.assertEqual(new.first_name, None)
+
+    def test_last_name(self):
+        """ Test last_name attribute is empty"""
+        new = self.value()
+        self.assertTrue(hasattr(new, "last_name"))
+        self.assertEqual(new.last_name, None)
+
+    def test_email(self):
+        """ Test email attribute is empty """
+        new = self.value()
+        self.assertTrue(hasattr(new, "email"))
+        self.assertEqual(new.email, None)
+
+    def test_password(self):
+        """ Test password attribute is empty """
+        new = self.value()
+        self.assertTrue(hasattr(new, "password"))
+        self.assertEqual(new.password, None)
+
+
+class TestUserDocs(unittest.TestCase):
+    """Tests to check the documentation and style of User class"""
     @classmethod
     def setUpClass(cls):
-        """set up for test"""
-        cls.user = User()
-        cls.user.first_name = "Kevin"
-        cls.user.last_name = "Yook"
-        cls.user.email = "yook00627@gmamil.com"
-        cls.user.password = "secret"
+        """Set up for the doc tests"""
+        cls.user_f = inspect.getmembers(User, inspect.isfunction)
 
-    @classmethod
-    def teardown(cls):
-        """at the end of the test this will tear it down"""
-        del cls.user
+    def test_pep8_conformance_user(self):
+        """Test that models/user.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['models/user.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def tearDown(self):
-        """teardown"""
-        try:
-            os.remove("file.json")
-        except Exception:
-            pass
+    def test_pep8_conformance_test_user(self):
+        """Test that tests/test_models/test_user.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['tests/test_models/test_user.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_pep8_User(self):
-        """Tests pep8 style"""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/user.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
+    def test_user_module_docstring(self):
+        """Test for the user.py module docstring"""
+        self.assertIsNot(user.__doc__, None,
+                         "user.py needs a docstring")
+        self.assertTrue(len(user.__doc__) >= 1,
+                        "user.py needs a docstring")
 
-    def test_checking_for_docstring_User(self):
-        """checking for docstrings"""
-        self.assertIsNotNone(User.__doc__)
+    def test_user_class_docstring(self):
+        """Test for the City class docstring"""
+        self.assertIsNot(User.__doc__, None,
+                         "User class needs a docstring")
+        self.assertTrue(len(User.__doc__) >= 1,
+                        "User class needs a docstring")
 
-    def test_attributes_User(self):
-        """chekcing if User have attributes"""
-        self.assertTrue('email' in self.user.__dict__)
-        self.assertTrue('id' in self.user.__dict__)
-        self.assertTrue('created_at' in self.user.__dict__)
-        self.assertTrue('updated_at' in self.user.__dict__)
-        self.assertTrue('password' in self.user.__dict__)
-        self.assertTrue('first_name' in self.user.__dict__)
-        self.assertTrue('last_name' in self.user.__dict__)
-
-    def test_is_subclass_User(self):
-        """test if User is subclass of Basemodel"""
-        self.assertTrue(issubclass(self.user.__class__, BaseModel), True)
-
-    def test_attribute_types_User(self):
-        """test attribute type for User"""
-        self.assertEqual(type(self.user.email), str)
-        self.assertEqual(type(self.user.password), str)
-        self.assertEqual(type(self.user.first_name), str)
-        self.assertEqual(type(self.user.first_name), str)
-
-    def test_save_User(self):
-        """test if the save works"""
-        self.user.save()
-        self.assertNotEqual(self.user.created_at, self.user.updated_at)
-
-    def test_to_dict_User(self):
-        """test if dictionary works"""
-        self.assertEqual('to_dict' in dir(self.user), True)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_user_func_docstrings(self):
+        """Test for the presence of docstrings in User methods"""
+        for func in self.user_f:
+            self.assertIsNot(func[1].__doc__, None,
+                             "{:s} method needs a docstring".format(func[0]))
+            self.assertTrue(len(func[1].__doc__) >= 1,
+                            "{:s} method needs a docstring".format(func[0]))

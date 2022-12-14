@@ -1,73 +1,103 @@
 #!/usr/bin/python3
-"""test for review"""
-import unittest
-import os
-from models.review import Review
-from models.base_model import BaseModel
+""" Contains tests for class Review """
+import inspect
 import pep8
+import unittest
+from tests.test_models.test_base_model import test_basemodel
+from models.review import Review
+from models import review
 
 
-class TestReview(unittest.TestCase):
-    """this will test the place class"""
+class test_review(test_basemodel):
+    """ Tests for class Review """
 
+    def __init__(self, *args, **kwargs):
+        """ Initialize class for testing """
+        super().__init__(*args, **kwargs)
+        self.name = "Review"
+        self.value = Review
+
+    def test_place_id(self):
+        """ Test place_id attribute to be an empty string"""
+        new = self.value()
+        self.assertTrue(hasattr(new, "place_id"))
+        self.assertEqual(new.place_id, None)
+
+    def test_user_id(self):
+        """ Test user_id attribute to be an empty string"""
+        new = self.value()
+        self.assertTrue(hasattr(new, "user_id"))
+        self.assertEqual(new.user_id, None)
+
+    def test_text(self):
+        """ Test text attribute to be an empty string"""
+        new = self.value()
+        self.assertTrue(hasattr(new, "text"))
+        self.assertEqual(new.text, None)
+
+    def test_to_dict_creates_dict(self):
+        """test to_dict method creates a dictionary"""
+        r = self.value()
+        new_d = r.to_dict()
+        self.assertEqual(type(new_d), dict)
+
+    def test_to_dict_values(self):
+        """test that values in dict returned from to_dict are correct"""
+        t_format = "%Y-%m-%dT%H:%M:%S.%f"
+        r = self.value()
+        new_d = r.to_dict()
+        self.assertFalse("_sa_instance_state" in new_d)
+        self.assertTrue("__class__" in new_d)
+        self.assertEqual(new_d["__class__"], "Review")
+        self.assertEqual(new_d["created_at"], r.created_at.strftime(t_format))
+        self.assertEqual(new_d["updated_at"], r.updated_at.strftime(t_format))
+
+    def test_str(self):
+        """test that the str method has the correct output"""
+        review = self.value()
+        string = "[Review] ({}) {}".format(review.id, review.to_dict())
+        self.assertEqual(string, str(review))
+
+
+class TestReviewDocs(unittest.TestCase):
+    """Tests to check the documentation and style of Review class"""
     @classmethod
     def setUpClass(cls):
-        """set up for test"""
-        cls.rev = Review()
-        cls.rev.place_id = "4321-dcba"
-        cls.rev.user_id = "123-bca"
-        cls.rev.text = "The srongest in the Galaxy"
+        """Set up for the doc tests"""
+        cls.review_f = inspect.getmembers(Review, inspect.isfunction)
 
-    @classmethod
-    def teardown(cls):
-        """at the end of the test this will tear it down"""
-        del cls.rev
+    def test_pep8_conformance_review(self):
+        """Test that models/review.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['models/review.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def tearDown(self):
-        """teardown"""
-        try:
-            os.remove("file.json")
-        except Exception:
-            pass
+    def test_pep8_conformance_test_review(self):
+        """Test that tests/test_models/test_review.py conforms to PEP8."""
+        pep8s = pep8.StyleGuide(quiet=True)
+        result = pep8s.check_files(['tests/test_models/test_review.py'])
+        self.assertEqual(result.total_errors, 0,
+                         "Found code style errors (and warnings).")
 
-    def test_pep8_Review(self):
-        """Tests pep8 style"""
-        style = pep8.StyleGuide(quiet=True)
-        p = style.check_files(['models/review.py'])
-        self.assertEqual(p.total_errors, 0, "fix pep8")
+    def test_review_module_docstring(self):
+        """Test for the review.py module docstring"""
+        self.assertIsNot(review.__doc__, None,
+                         "review.py needs a docstring")
+        self.assertTrue(len(review.__doc__) >= 1,
+                        "review.py needs a docstring")
 
-    def test_checking_for_docstring_Review(self):
-        """checking for docstrings"""
-        self.assertIsNotNone(Review.__doc__)
+    def test_review_class_docstring(self):
+        """Test for the Review class docstring"""
+        self.assertIsNot(Review.__doc__, None,
+                         "Review class needs a docstring")
+        self.assertTrue(len(Review.__doc__) >= 1,
+                        "Review class needs a docstring")
 
-    def test_attributes_review(self):
-        """chekcing if review have attributes"""
-        self.assertTrue('id' in self.rev.__dict__)
-        self.assertTrue('created_at' in self.rev.__dict__)
-        self.assertTrue('updated_at' in self.rev.__dict__)
-        self.assertTrue('place_id' in self.rev.__dict__)
-        self.assertTrue('text' in self.rev.__dict__)
-        self.assertTrue('user_id' in self.rev.__dict__)
-
-    def test_is_subclass_Review(self):
-        """test if review is subclass of BaseModel"""
-        self.assertTrue(issubclass(self.rev.__class__, BaseModel), True)
-
-    def test_attribute_types_Review(self):
-        """test attribute type for Review"""
-        self.assertEqual(type(self.rev.text), str)
-        self.assertEqual(type(self.rev.place_id), str)
-        self.assertEqual(type(self.rev.user_id), str)
-
-    def test_save_Review(self):
-        """test if the save works"""
-        self.rev.save()
-        self.assertNotEqual(self.rev.created_at, self.rev.updated_at)
-
-    def test_to_dict_Review(self):
-        """test if dictionary works"""
-        self.assertEqual('to_dict' in dir(self.rev), True)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_review_func_docstrings(self):
+        """Test for the presence of docstrings in Review methods"""
+        for func in self.review_f:
+            self.assertIsNot(func[1].__doc__, None,
+                             "{:s} method needs a docstring".format(func[0]))
+            self.assertTrue(len(func[1].__doc__) >= 1,
+                            "{:s} method needs a docstring".format(func[0]))
